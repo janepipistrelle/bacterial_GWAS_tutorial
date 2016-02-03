@@ -1,0 +1,135 @@
+Introduction to Bacterial Genome Wide Association Studies
+========================================================
+
+**Learning Objectives:**
+-------------------------
+1.  To describe some of the problems with carrying out genome wide association studies (GWAS) in bacteria using whole genome sequencing data.
+2.	To gain familiarity with the steps in a bacterial GWAS software pipeline.
+3.	To use the _bugwas_ R package to identify loci and lineages associated with antibiotic resistance.
+
+Genome wide association studies (GWAS)
+-------------------------
+Genome wide association studies (GWAS) aim to test genetic variants for association with a phenotype of interest. DNA sequences from individuals with the phenotype of interest (cases) are compared with those without (controls) to test whether any variants are significantly associated with one or other group. Traditionally, GWAS studies were carried out using SNP arrays, but advances in genome sequencing technology have made it possible to use whole genomes instead, especially for organisms with small genomes, such as bacteria. 
+
+
+Problems with doing GWAS in bacteria
+-------------------------
+Doing GWAS in bacteria poses some unique problems, however. Different species of bacteria vary immensely in how often their genomes recombine and most species have only a single, circular chromosome. This means that even variants that are not in close physical proximity on the chromosome are in linkage disequilibrium. In addition, bacterial populations often exhibit strong signals of structure, due to expansion of ecologically successful clones in free-living species and isolation in different hosts in pathogens. Finally, individuals of the same bacterial species often vary quite dramatically in gene content, so just looking at SNPs called relative to a reference genome risks ignoring much interesting variation. Our group has written a pipeline for bacterial GWAS which deals with this problem by looking at variation in SNPs, gene presence/absence and 31nt kmers. Today we'll carry out a GWAS together identifying kmers from _Staphylococcus aureus_ that are associated with resistance to the antibiotic fusidic acid.
+
+Outline of workflow for bacterial GWAS
+-------------------------
+1.  Set up – assemble data files, check dependencies.
+2.	Basic kmer GWAS using chi-square test.
+3.	Annotate top kmers with BLAST.
+4.	Controlling for population structure with a linear mixed model (running Gemma).
+5.	Compare top kmers before and after controlling for population structure.
+6.  Use _bugwas_ R packaage to detect lineage and locus effects.
+
+Dependencies
+-------------------------
+The code we are using today is taken from our GWAS pipeline, which can be found here: https://github.com/jessiewu/bacterialGWAS
+
+Our pipeline is written in R so we are going to use R on the command line to run some of the scripts from the pipeline. It relies on some external dependencies, which are `BLAST` and ```Gemma``` (Gemma version 0.93 needed for _bugwas_) and the installation of the R package _bugwas_. For this example we are only doing a kmer GWAS. The dataset we will use is a subset of genomes from a study aimed at detecting antibiotic resistance variants in _S. aureus_ (Gordon et al 2013).
+
+Files provided:
+-------------------------
+* Kmer files – 1 genome per file. These were generated from raw sequencing reads using the kmer counting software ```dsk```.
+*	List of kmer file paths linked to phenotypes. 
+*	Relatedness matrix calculated from genomic SNPs
+*	Maximum-likelihood phylogeny calculated from genomic SNPs
+*	BLAST databases and gene look-up table for annotation
+*	R scripts: kmerAnalysis.R, kmerAnnotation.R, kmerLMM.R, LMM_kmerAnnotation.R
+* _bugwas_ library in R - installed
+* List of paths to software dependencies (these have been installed for you)
+
+Run basic GWAS analysis:
+-------------------------
+Normally the input to our pipeline starts with raw reads in a bam or fasta file, but kmer-counting is time-consuming so we have generated kmer files for you. Each kmer file contains the reads from a single genome, split up into 31-nucleotide kmers. The files in the ```kmers``` directory contain the set of unique kmers in each genome. ```Fus.kmer.files.txt``` lists the path to the fasta file for each genome and the phenotype for fusidic acid resistance for each genome.For the phenotypes, 0 and 1 denote sensitivity or resistance to fusidic acid, respectively.
+
+Now we need to run a piece of c++ code that gets patterns of presence or absence of each kmer in each genome and tests each kmer for a significant association with the phenotype using a Chi-Square test. 
+
+We run this using the following R script:
+
+```
+#Bash Shell
+Rscript kmerAnalysis.R –dataFile fus.kmer.files.txt –prefix fus –removeKmerTxt FALSE –mincov 5 –externalSoftware dependencies.txt
+```
+
+Annotating significant kmers
+-------------------------
+We can annotate our significant kmers by aligning them to a database of reference genomes using BLAST. This R script BLASTs kmers against a database of genomes downloaded from GenBank and then checks their positions against a look-up table of Staph genes. Any kmers that do not have a good hit to a Staph genome are BLASTed for a second time against the whole nucleotide database from NCBI. To save time, we have created the BLAST databases for you.
+```
+#Bash Shell
+Rscript kmerAnnotation.R –chisq_results –kmer_results –present_ctrl –present_case –blastdb1 –blastdb2 –ncbi_db –signif –nproc –prefix –externalSoftware dependencies.txt
+```
+
+Visualising significant kmers
+-------------------------
+The script we just ran generates P-values from the chi-square test for each kmer. It also generates a couple of plots – an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of –log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). 
+
+Correcting for population structure
+-------------------------
+Next we want to re-run our GWAS using a control for population structure. The approach we use for controlling for population structure is a linear mixed model (LMM) implemented in the software Gemma (REF). What this does is assigns all variants a background significance level. Each variant in turn is then tested to see if its individual significance is above this background level. This acts to remove variants that are associated with specific lineages.
+
+We will run the GWAS with linear mixed model and compare the results.  This script uses the output of kmerAnalysis.R and also requires an additional file, relatedness_matrix.txt which contains a relatedness matrix calculated from genomic SNPs in this dataset.
+
+```
+#Bash Shell
+Rscript kmerLMM.R –chisqStat –patternKey –patternIndex –signif –relateMatrix –phenotype –prefix –externalSoftware dependencies.txt
+```
+Now we annotate the significant kmers as before…
+
+```
+#Bash Shell
+Rscript LMM_kmerAnnotation.R –chisq_results –kmer_results –present_ctrl –present_case –blastdb1 –blastdb2 –ncbi_db –signif –nproc –prefix –LMM_kmers –LMM_output –externalSoftware dependencies.txt
+```
+We can then look at the top kmers and see if they map to the same gene. The script also outputs a plot comparing the p-values of our kmers before and after controlling for population structure - we can see that the most significant kmers are still the same ones, but they drop in significance.
+
+Identifying lineage-associated as well as locus-specific variants with bugwas
+-------------------------
+In the second part of this tutorial we'll look at applying our method for identifying both lineage and locus-specific effects. This is implemented in the R package _bugwas_. We will now run _bugwas_ to identify lineages associated with fusidic acid resistance.
+
+In many cases this is important because we observed that for many phenotypes (and for fusidic acid resistance with a larger dataset), the most significant variants drop dramatically in significance after controlling for population structure.
+
+```
+#R
+R
+#load the bugwas library, which we will use to test for lineage effects
+library(bugwas)
+
+#First we need to define a few variables..
+
+gem.path="./software/bugwas-master/gemma/gemma.0.93b"
+
+output.dir="./"
+
+#Then we call the function “lin_loc” which tests for both lineage and locus effects and generates a bunch of plots. This function needs the genotypes, phenotype, the relatedness matrix we used earlier and the path to the GEMMA software.
+lin_loc(gen="data/fus300_bugwas_gemma_gen_format.txt",pheno="data/fus300_bugwas.pheno.txt",phylo="data/RAxML_bestTree.fus300",prefix="fus300",gem.path="./software/bugwas-master/gemma/gemma.0.93b",var.matrix="data/fus300_bugwas.var.matrix.txt",relmatrix="data/fus300_gemma_relmatrixout.cXX.txt", output.dir=output.dir)
+
+```
+
+Let's look at some of the plots produced by _bugwas_. The key plot that we are going to look at today is `fus300_tree_branchescolouredbyPC.png`. This shows lineages that are associated with fusidic acid resistance. The lineages are defined by principal components (PCs) (for the maths behind this, please refer to McVean, 2009). Here we can see that PCs 1 and 6 split off groups of resistant and sensitive isolates.
+
+We can also look at which variants are associated with the phenotype. The plot `fus300_genVar1_ManhattanLMMPvalues.png` shows that we have lineage-specific variants strongly associated with fusidic acid resistance (in green) and variants that are associated with the phenotype (high -log10 p-value) but which are not significantly associated with any lineage (not shaded). You'll have to take my word for this, but when we looked mapped the kmers corresponding to the locus-specific effects up, they map to _fusA_, a gene known to be associated with fusidic acid resistance.
+
+What we haven't covered today
+-------------------------
+GWAS is a complex topic and this tutorial is just a snapshot. We haven't covered some other very important topics in GWAS such as correcting for multiple testing and the challenges presented by including low-frequency variants in the analysis. Our group is working on refining these aspects of our pipeline so if you're interested in this, please watch this space.
+
+References
+-------------------------
+1. Gordon NC, Price JR, Cole K, Everitt R, Morgan M, Finney J, Kearns AM, Pichon  B, Young B, Wilson DJ, Llewelyn MJ, Paul J, Peto TE, Crook DW, Walker AS, Golubchik T. Prediction of Staphylococcus aureus antimicrobial resistance by whole-genome sequencing. J Clin Microbiol. 2014 Apr;52(4):1182-91. doi: 10.1128/JCM.03117-13.
+
+2. Earle, Sarah G; Wu, Chieh-Hsi; Charlesworth, Jane et al. Identifying lineage effects when controlling for population structure improves power in bacterial association studies Preprint: arXiv:1510.06863v2
+
+3. McVean G. A genealogical interpretation of principal components analysis. PLoS Genet. 2009 Oct;5(10):e1000686. doi: 10.1371/journal.pgen.1000686.
+
+
+Software:
+-------------------------
+GWAS pipeline:
+Github: jessiewu/bacterial_GWAS
+
+_bugwas_ R package:
+Github: sgearle/bugwas
+
