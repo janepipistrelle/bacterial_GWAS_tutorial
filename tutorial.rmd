@@ -27,9 +27,30 @@ Outline of workflow for bacterial GWAS
 
 Dependencies
 -------------------------
-The code we are using today is taken from our GWAS pipeline, which can be found here: https://github.com/jessiewu/bacterialGWAS
+Let's start with downloading and installing all of the software we need to run our GWAS.
 
-Our pipeline is written in R so we are going to use R on the command line to run some of the scripts from the pipeline. It relies on some external dependencies, which are `BLAST` and ```Gemma``` (Gemma version 0.93 needed for _bugwas_) and the installation of the R package _bugwas_. For this example we are only doing a kmer GWAS. The dataset we will use is a subset of genomes from a study aimed at detecting antibiotic resistance variants in _S. aureus_ (Gordon et al 2013).
+
+Our pipeline is written in R and we are going to use R on the command line to run some of the scripts from the pipeline. 
+
+Let's start by installing R...
+```mkdir \soft```
+```sudo apt-get install r-base-core```
+```sudo apt-get install ncbi-blast+ ```
+
+Then we'll download the scripts for our GWAS pipeline:
+
+```git clone https://github.com/jessiewu/bacterialGWAS.git```
+
+For this example we are only doing a kmer GWAS so the relevant scripts are all in the ```kmerGWAS``` directory.
+
+We also need a few more external dependencies, which are `BLAST` and ```Gemma```:
+```sudo apt-get install ncbi-blast+```
+```git clone git@github.com:xiangzhou/GEMMA.git```
+
+And we need to download the R package _bugwas_:
+```git clone git@github.com:sgearle/bugwas.git```
+
+The dataset we will use is a subset of genomes from a study aimed at detecting antibiotic resistance variants in _S. aureus_ (Gordon et al 2013).
 
 Files provided:
 -------------------------
