@@ -1,6 +1,14 @@
 Introduction to Bacterial Genome Wide Association Studies
 ========================================================
 
+Set up to run this on Amazon EC2:
+-------------------------
+1. Launch EC2 instance
+2. Download the data:
+```wget http://dib-training.ucdavis.edu.s3.amazonaws.com/2016-bodega/jane-data.tar.gz```
+
+It should unpack into ```~/data```
+
 **Learning Objectives:**
 -------------------------
 1.  To describe some of the problems with carrying out genome wide association studies (GWAS) in bacteria using whole genome sequencing data.
@@ -65,7 +73,6 @@ install.packages("genoPlotR")
 install.packages("\soft/bugwas/bugwas_1.0.tar.gz", repos = NULL, type="source")
 ```
 
-The dataset we will use is a subset of genomes from a study aimed at detecting antibiotic resistance variants in _S. aureus_ (Gordon et al 2013).
 
 Files provided:
 -------------------------
