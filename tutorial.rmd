@@ -96,7 +96,7 @@ We run this using the following R script:
 
 ```
 #Bash Shell
-Rscript kmerAnalysis.R –dataFile fus.kmer.files.txt –prefix fus –removeKmerTxt FALSE –mincov 5 –externalSoftware dependencies.txt
+Rscript kmerAnalysis.R –dataFile fus300.kmerfiles.txt –prefix fus –removeKmerTxt FALSE –mincov 5 –externalSoftware dependencies.txt
 ```
 
 Annotating significant kmers
@@ -104,7 +104,7 @@ Annotating significant kmers
 We can annotate our significant kmers by aligning them to a database of reference genomes using BLAST. This R script BLASTs kmers against a database of genomes downloaded from GenBank and then checks their positions against a look-up table of Staph genes. Any kmers that do not have a good hit to a Staph genome are BLASTed for a second time against the whole nucleotide database from NCBI. To save time, we have created the BLAST databases for you.
 ```
 #Bash Shell
-Rscript kmerAnnotation.R –chisq_results –kmer_results –present_ctrl –present_case –blastdb1 –blastdb2 –ncbi_db –signif –nproc –prefix –externalSoftware dependencies.txt
+Rscript kmerAnnotation.R –chisq_results fus300.gwaskmer-out.chisqStat.txt –kmer_results fus300.gwaskmer-out.kmer.txt –present_ctrl fus300.gwaskmer-out.nPresentCtrl.txt  –present_case  fus300.gwaskmer-out.nPresentCase.txt –blastdb1 ~/data/dbs/staphdb3.blast –blastdb2 ~/data/dbs/nt_blastdb –ncbi_db ~/data/dbs/geneannot.allstaph.txt –signif 5000 –nproc 2 –prefix fus300 –externalSoftware dependencies.txt
 ```
 
 Visualising significant kmers
@@ -119,13 +119,13 @@ We will run the GWAS with linear mixed model and compare the results.  This scri
 
 ```
 #Bash Shell
-Rscript kmerLMM.R –chisqStat –patternKey –patternIndex –signif –relateMatrix –phenotype –prefix –externalSoftware dependencies.txt
+Rscript kmerLMM.R –chisqStat fus300.gwaskmer-out.chisqStat.txt –patternKey fus300.gwaskmer-out.patternKey.txt –patternIndex fus300.gwaskmer-out.patternIndex.txt  –signif 5000 –relateMatrix ~/data/fus300_gemma_relmatrixout.cXX.txt –phenotype ~/data/fus300.pheno.txt –prefix fus300 –externalSoftware dependencies.txt
 ```
 Now we annotate the significant kmers as before…
 
 ```
 #Bash Shell
-Rscript LMM_kmerAnnotation.R –chisq_results –kmer_results –present_ctrl –present_case –blastdb1 –blastdb2 –ncbi_db –signif –nproc –prefix –LMM_kmers –LMM_output –externalSoftware dependencies.txt
+Rscript LMM_kmerAnnotation.R –chisq_results fus300.gwaskmer-out.chisqStat.txt –kmer_results fus300.gwaskmer-out.kmer.txt –present_ctrl fus300.gwaskmer-out.nPresentCtrl.txt –present_case fus300.gwaskmer-out.nPresentCase.txt ~/data/dbs/staphdb3.blast –blastdb2 ~/data/dbs/nt_blastdb –ncbi_db ~/data/dbs/geneannot.allstaph.txt –signif 5000 –nproc 2 –prefix fus300 –LMM_kmers fus300_lmm_kmers_used.txt –LMM_output fus300_lmm_LMM_allkmers_out.txt –externalSoftware dependencies.txt
 ```
 We can then look at the top kmers and see if they map to the same gene. The script also outputs a plot comparing the p-values of our kmers before and after controlling for population structure - we can see that the most significant kmers are still the same ones, but they drop in significance.
 
@@ -145,10 +145,10 @@ library(bugwas)
 
 gem.path="./software/bugwas-master/gemma/gemma.0.93b"
 
-output.dir="./"
+output.dir="./bugwas_out"
 
 #Then we call the function “lin_loc” which tests for both lineage and locus effects and generates a bunch of plots. This function needs the genotypes, phenotype, the relatedness matrix we used earlier and the path to the GEMMA software.
-lin_loc(gen="data/fus300_bugwas_gemma_gen_format.txt",pheno="data/fus300_bugwas.pheno.txt",phylo="data/RAxML_bestTree.fus300",prefix="fus300",gem.path="./software/bugwas-master/gemma/gemma.0.93b",var.matrix="data/fus300_bugwas.var.matrix.txt",relmatrix="data/fus300_gemma_relmatrixout.cXX.txt", output.dir=output.dir)
+lin_loc(gen="~/data/fus300_bugwas_gemma_gen_format.txt",pheno="~/data/fus300_bugwas.pheno.txt",phylo="~/data/RAxML_bestTree.fus300",prefix="fus300",gem.path="~/soft/bugwas-master/gemma/gemma.0.93b",var.matrix="~/data/fus300_bugwas.var.matrix.txt",relmatrix="~/data/fus300_gemma_relmatrixout.cXX.txt", output.dir=output.dir)
 
 ```
 
