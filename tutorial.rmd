@@ -32,40 +32,55 @@ Let's start with downloading and installing all of the software we need to run o
 
 Our pipeline is written in R and we are going to use R on the command line to run some of the scripts from the pipeline. 
 
-Let's start by installing R...
+Let's start by installing R.
+
 ```mkdir \soft```
+
 ```sudo apt-get install r-base-core```
-```sudo apt-get install ncbi-blast+ ```
+
 
 Then we'll download the scripts for our GWAS pipeline:
+
+```sudo apt-get install git```
 
 ```git clone https://github.com/jessiewu/bacterialGWAS.git```
 
 For this example we are only doing a kmer GWAS so the relevant scripts are all in the ```kmerGWAS``` directory.
 
-We also need a few more external dependencies, which are `BLAST` and ```Gemma```:
-```sudo apt-get install ncbi-blast+```
-```git clone git@github.com:xiangzhou/GEMMA.git```
+We also need a few more external dependencies, which are `BLAST` and ```GEMMA```:
+
+```
+sudo apt-get install ncbi-blast+
+git clone git@github.com:xiangzhou/GEMMA.git
+```
 
 And we need to download the R package _bugwas_:
+
 ```git clone git@github.com:sgearle/bugwas.git```
+
+Finally, let's open R and install a couple of packages.
+```
+R
+install.packages("genoPlotR")
+install.packages("\soft/bugwas/bugwas_1.0.tar.gz", repos = NULL, type="source")
+```
 
 The dataset we will use is a subset of genomes from a study aimed at detecting antibiotic resistance variants in _S. aureus_ (Gordon et al 2013).
 
 Files provided:
 -------------------------
 * Kmer files – 1 genome per file. These were generated from raw sequencing reads using the kmer counting software ```dsk```.
-*	List of kmer file paths linked to phenotypes. 
-*	Relatedness matrix calculated from genomic SNPs
-*	Maximum-likelihood phylogeny calculated from genomic SNPs
+*	List of kmer file paths linked to phenotypes.
+*	Relatedness matrix calculated from genomic SNPs (this is created by ```GEMMA```.
+*	Maximum-likelihood phylogeny calculated from genomic SNPs (we use ```PhyML``` for < 100 genomes and ```RAxML``` for > 100 genomes)
 *	BLAST databases and gene look-up table for annotation
 *	R scripts: kmerAnalysis.R, kmerAnnotation.R, kmerLMM.R, LMM_kmerAnnotation.R
-* _bugwas_ library in R - installed
-* List of paths to software dependencies (these have been installed for you)
+* _bugwas_ library in R.
+* List of paths to software dependencies.
 
 Run basic GWAS analysis:
 -------------------------
-Normally the input to our pipeline starts with raw reads in a bam or fasta file, but kmer-counting is time-consuming so we have generated kmer files for you. Each kmer file contains the reads from a single genome, split up into 31-nucleotide kmers. The files in the ```kmers``` directory contain the set of unique kmers in each genome. ```Fus.kmer.files.txt``` lists the path to the fasta file for each genome and the phenotype for fusidic acid resistance for each genome.For the phenotypes, 0 and 1 denote sensitivity or resistance to fusidic acid, respectively.
+Normally the input to our pipeline starts with raw reads in a bam or fasta file, but kmer-counting is time-consuming so we have generated kmer files for you. Each kmer file contains the reads from a single genome, split up into 31-nucleotide kmers. The files in the ```kmers``` directory contain the set of unique kmers in each genome. ```fus300.kmer.files.txt``` lists the path to the fasta file for each genome and the phenotype for fusidic acid resistance for each genome.For the phenotypes, 0 and 1 denote sensitivity or resistance to fusidic acid, respectively.
 
 Now we need to run a piece of c++ code that gets patterns of presence or absence of each kmer in each genome and tests each kmer for a significant association with the phenotype using a Chi-Square test. 
 
@@ -86,13 +101,13 @@ Rscript kmerAnnotation.R –chisq_results –kmer_results –present_ctrl –pre
 
 Visualising significant kmers
 -------------------------
-The script we just ran generates P-values from the chi-square test for each kmer. It also generates a couple of plots – an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of –log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). 
+The script we just ran generates p-values from the chi-square test for each kmer. It also generates a couple of plots – an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of –log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). YAY. 
 
 Correcting for population structure
 -------------------------
-Next we want to re-run our GWAS using a control for population structure. The approach we use for controlling for population structure is a linear mixed model (LMM) implemented in the software Gemma (REF). What this does is assigns all variants a background significance level. Each variant in turn is then tested to see if its individual significance is above this background level. This acts to remove variants that are associated with specific lineages.
+Next we want to re-run our GWAS using a control for population structure. The approach we use for controlling for population structure is a linear mixed model (LMM) implemented in the software ```GEMMA``` (Zhou & Stephens 2012). What this does is assigns all variants a background significance level. Each variant in turn is then tested to see if its individual significance is above this background level. This acts to remove variants that are associated with specific lineages.
 
-We will run the GWAS with linear mixed model and compare the results.  This script uses the output of kmerAnalysis.R and also requires an additional file, relatedness_matrix.txt which contains a relatedness matrix calculated from genomic SNPs in this dataset.
+We will run the GWAS with linear mixed model and compare the results.  This script uses the output of ```kmerAnalysis.R``` and also requires an additional file, relatedness_matrix.txt which contains a relatedness matrix calculated from genomic SNPs in this dataset. This file is located with the other data we downloaded.
 
 ```
 #Bash Shell
@@ -143,7 +158,10 @@ References
 
 2. Earle, Sarah G; Wu, Chieh-Hsi; Charlesworth, Jane et al. Identifying lineage effects when controlling for population structure improves power in bacterial association studies Preprint: arXiv:1510.06863v2
 
-3. McVean G. A genealogical interpretation of principal components analysis. PLoS Genet. 2009 Oct;5(10):e1000686. doi: 10.1371/journal.pgen.1000686.
+3. Zhou X, Stephens M. Genome-wide efficient mixed-model analysis for association
+studies. Nat Genet. 2012 Jun 17;44(7):821-4. doi: 10.1038/ng.2310.
+
+4. McVean G. A genealogical interpretation of principal components analysis. PLoS Genet. 2009 Oct;5(10):e1000686. doi: 10.1371/journal.pgen.1000686.
 
 
 Software:
