@@ -103,7 +103,7 @@ Then, back on the EC2 instance, create a list of the paths to each of the follow
 cat > dependencies.txt <<EOF
 name	path
 GEMMA	~/bugwas/gemma/gemma.0.93b
-blastn	/bin/blastn
+blastn	/usr/bin/blastn
 EOF
 ```
 
