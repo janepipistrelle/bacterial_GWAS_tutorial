@@ -5,10 +5,13 @@ Set up to run this on Amazon EC2:
 -------------------------
 1. Launch EC2 instance: we will run Ubuntu 14.04 LTS (64-bit) on an m3.2xlarge instance. Before you click 'Review and Launch', increase the root file system size to 30 GB.
 
-2. Download the data:
-```wget http://dib-training.ucdavis.edu.s3.amazonaws.com/2016-bodega/jane-data.tar.gz```
+2. Download the data and unpack it into ```~/data``` (this step take a while, so we're going to get it running and go through the background).
 
-It should unpack into ```~/data``` (this step take a while, so we're going to get it running and go through the background).
+```
+wget http://dib-training.ucdavis.edu.s3.amazonaws.com/2016-bodega/jane-data2.tar.gz
+tar -xvf jane-data2.tar.gz
+```
+
 
 **Learning Objectives:**
 -------------------------
