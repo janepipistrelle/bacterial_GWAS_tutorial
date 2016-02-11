@@ -126,7 +126,7 @@ We run this using the following R script:
 
 ```
 #Bash Shell
-Rscript bacterialGWAS/kmerGWAS/kmerAnalysis.R -dataFile ~/data/fus300.kmerfiles.txt -prefix fus -removeKmerTxt FALSE -minCov 5 -externalSoftware dependencies.txt
+Rscript bacterialGWAS/kmerGWAS/kmerAnalysis.R -dataFile ~/data/fus300.kmerfiles.txt -prefix fus300 -removeKmerTxt FALSE -minCov 5 -externalSoftware dependencies.txt
 ```
 
 
@@ -137,7 +137,7 @@ The script we just ran generates p-values from the chi-square test for each kmer
 Get them to your local machine with the following:
 
 ```
-scp bugwas:/mnt/*.png
+scp bugwas:~/*.png ./
 ```
 
 The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of –log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). YAY. 
@@ -150,7 +150,7 @@ We will run the GWAS with linear mixed model and compare the results.  This scri
 
 ```
 #Bash Shell
-Rscript kmerLMM.R –chisqStat fus300.gwaskmer-out.chisqStat.txt –patternKey fus300.gwaskmer-out.patternKey.txt –patternIndex fus300.gwaskmer-out.patternIndex.txt  –signif 5000 –relateMatrix ~/data/fus300_gemma_relmatrixout.cXX.txt –phenotype ~/data/fus300.pheno.txt –prefix fus300 –externalSoftware dependencies.txt
+Rscript bacterialGWAS/kmerGWAS/kmerLMM.R –chisqStat fus300.gwaskmer-out.chisqStat.txt –patternKey fus300.gwaskmer-out.patternKey.txt –patternIndex fus300.gwaskmer-out.patternIndex.txt  –signif 5000 –relateMatrix ~/data/fus300_gemma_relmatrixout.cXX.txt –phenotype ~/data/fus300.pheno.txt –prefix fus300 –externalSoftware dependencies.txt
 ```
 
 The script outputs a plot comparing the p-values of our kmers before and after controlling for population structure - we can see that the most significant kmers are still the same ones, but they drop in significance.
@@ -169,19 +169,19 @@ library(bugwas)
 
 #First we need to define a few variables..
 
-gem.path="./software/bugwas-master/gemma/gemma.0.93b"
+gem.path="bugwas-master/gemma/gemma.0.93b"
 
 output.dir="./bugwas_out"
 
 #Then we call the function “lin_loc” which tests for both lineage and locus effects and generates a bunch of plots. This function needs the genotypes, phenotype, the relatedness matrix we used earlier and the path to the GEMMA software.
-lin_loc(gen="~/data/fus300_bugwas_gemma_gen_format.txt",pheno="~/data/fus300_bugwas.pheno.txt",phylo="~/data/RAxML_bestTree.fus300",prefix="fus300",gem.path="~/soft/bugwas-master/gemma/gemma.0.93b",var.matrix="~/data/fus300_bugwas.var.matrix.txt",relmatrix="~/data/fus300_gemma_relmatrixout.cXX.txt", output.dir=output.dir)
+lin_loc(gen="data/fus300_bugwas_gemma_gen_format.txt",pheno="data/fus300_bugwas.pheno.txt",phylo="data/RAxML_bestTree.fus300",prefix="fus300",gem.path="ugwas-master/gemma/gemma.0.93b",var.matrix="data/fus300_bugwas.var.matrix.txt",relmatrix="data/fus300_gemma_relmatrixout.cXX.txt", output.dir=output.dir)
 
 ```
 
 Let's look at some of the plots produced by _bugwas_ - get them on your local machine.
 
 ```
-scp bugwas:/mnt/bugwas*.png
+scp bugwas:bugwas_out/*.png ./
 ```
 
 The key plot that we are going to look at today is `fus300_tree_branchescolouredbyPC.png`. This shows lineages that are associated with fusidic acid resistance. The lineages are defined by principal components (PCs) (for the maths behind this, please refer to McVean, 2009). Here we can see that PCs 1 and 6 split off groups of resistant and sensitive isolates.
