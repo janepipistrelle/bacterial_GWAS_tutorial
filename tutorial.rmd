@@ -33,7 +33,7 @@ Doing GWAS in bacteria poses some unique problems, however. Different species of
 
 Outline of workflow for bacterial GWAS
 -------------------------
-1.  Set up – assemble data files, check dependencies.
+1.  Set up - assemble data files, check dependencies.
 2.	Basic kmer GWAS using chi-square test.
 3.	Annotate top kmers with BLAST.
 4.	Controlling for population structure with a linear mixed model (running Gemma).
@@ -103,7 +103,7 @@ blastn /usr/bin/blastn
 
 Files provided:
 -------------------------
-* Kmer files – 1 genome per file. These were generated from raw sequencing reads using the kmer counting software ```dsk```.
+* Kmer files - 1 genome per file. These were generated from raw sequencing reads using the kmer counting software ```dsk```.
 *	List of kmer file paths linked to phenotypes.
 *	Relatedness matrix calculated from genomic SNPs (this is created by ```GEMMA```.
 *	Maximum-likelihood phylogeny calculated from genomic SNPs (we use ```PhyML``` for < 100 genomes and ```RAxML``` for > 100 genomes)
@@ -132,7 +132,7 @@ Rscript bacterialGWAS/kmerGWAS/kmerAnalysis.R -dataFile ~/data/fus300.kmerfiles.
 
 Visualising significant kmers
 -------------------------
-The script we just ran generates p-values from the chi-square test for each kmer. It also generates a couple of plots – an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. 
+The script we just ran generates p-values from the chi-square test for each kmer. It also generates a couple of plots - an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. 
 
 Get them to your local machine with the following:
 
@@ -140,7 +140,7 @@ Get them to your local machine with the following:
 scp bugwas:~/*.png ./
 ```
 
-The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of –log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). YAY. 
+The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of -log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). YAY. 
 
 Correcting for population structure
 -------------------------
@@ -150,7 +150,7 @@ We will run the GWAS with linear mixed model and compare the results.  This scri
 
 ```
 #Bash Shell
-Rscript bacterialGWAS/kmerGWAS/kmerLMM.R –chisqStat fus300.gwaskmer-out.chisqStat.txt –patternKey fus300.gwaskmer-out.patternKey.txt –patternIndex fus300.gwaskmer-out.patternIndex.txt  –signif 5000 –relateMatrix ~/data/fus300_gemma_relmatrixout.cXX.txt –phenotype ~/data/fus300.pheno.txt –prefix fus300 –externalSoftware dependencies.txt
+Rscript bacterialGWAS/kmerGWAS/kmerLMM.R -chisqStat fus300.gwaskmer-out.chisqStat.txt -patternKey fus300.gwaskmer-out.patternKey.txt -patternIndex fus300.gwaskmer-out.patternIndex.txt  -signif 5000 -relateMatrix ~/data/fus300_gemma_relmatrixout.cXX.txt -phenotype ~/data/fus300.pheno.txt -prefix fus300 -externalSoftware dependencies.txt
 ```
 
 The script outputs a plot comparing the p-values of our kmers before and after controlling for population structure - we can see that the most significant kmers are still the same ones, but they drop in significance.
@@ -199,7 +199,7 @@ Now we annotate the significant kmers as before…
 
 ```
 #Bash Shell
-Rscript LMM_kmerAnnotation.R –chisq_results fus300.gwaskmer-out.chisqStat.txt –kmer_results fus300.gwaskmer-out.kmer.txt –present_ctrl fus300.gwaskmer-out.nPresentCtrl.txt –present_case fus300.gwaskmer-out.nPresentCase.txt ~/data/dbs/staphdb3.blast –blastdb2 ~/data/dbs/nt_blastdb –ncbi_db ~/data/dbs/geneannot.allstaph.txt –signif 5000 –nproc 2 –prefix fus300 –LMM_kmers fus300_lmm_kmers_used.txt –LMM_output fus300_lmm_LMM_allkmers_out.txt –externalSoftware dependencies.txt
+Rscript LMM_kmerAnnotation.R -chisq_results fus300.gwaskmer-out.chisqStat.txt -kmer_results fus300.gwaskmer-out.kmer.txt -present_ctrl fus300.gwaskmer-out.nPresentCtrl.txt -present_case fus300.gwaskmer-out.nPresentCase.txt ~/data/dbs/staphdb3.blast -blastdb2 ~/data/dbs/nt_blastdb -ncbi_db ~/data/dbs/geneannot.allstaph.txt -signif 5000 -nproc 2 -prefix fus300 -LMM_kmers fus300_lmm_kmers_used.txt -LMM_output fus300_lmm_LMM_allkmers_out.txt -externalSoftware dependencies.txt
 ```
 We can then look at the top kmers and see if they map to the same gene. Note: you could annotate kmers in other ways than by using BLAST - eg by mapping to a reference.
 
