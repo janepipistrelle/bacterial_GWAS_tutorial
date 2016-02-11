@@ -3,14 +3,16 @@ Introduction to Bacterial Genome Wide Association Studies
 
 Set up to run this on Amazon EC2:
 -------------------------
-1. Launch EC2 instance: we will run Ubuntu 14.04 LTS (64-bit) on an m3.2xlarge instance. Before you click 'Review and Launch', increase the root file system size to 30 GB.
+1. Launch EC2 instance: we will run Ubuntu 14.04 LTS (64-bit) on an m3.2xlarge instance. Before you click 'Review and Launch', increase the root file system size to 100 GB.
 
 2. Download the data and unpack it into ```~/data``` (this step take a while, so we're going to get it running and go through the background).
 
 ```
 wget http://dib-training.ucdavis.edu.s3.amazonaws.com/2016-bodega/jane-data.tar.gz
 wget http://dib-training.ucdavis.edu.s3.amazonaws.com/2016-bodega/jane-data2.tar.gz
-tar -xvf jane-data.tar.gz jane-data2.tar.gz
+tar -xvf jane-data.tar.gz 
+tar -xvf jane-data2.tar.gz
+rm -f *.gz
 ```
 
 
@@ -76,20 +78,31 @@ And we need to download the R package _bugwas_:
 
 ```git clone https://github.com/sgearle/bugwas.git```
 
-Finally, let's open R and install a couple of packages.
+Finally, let's open R and install a couple of packages (select 25 for mirror when prompted and answer yes when it asks if you want to install into a local library directory).
 ```
 R
 install.packages("genoPlotR")
 install.packages("ape")
 install.packages("phangorn") #this takes forever on Ubuntu.
 install.packages("bugwas/build/bugwas_1.0.tar.gz", repos = NULL, type="source")
+q() #I'd save workspace image just in case something failed to install and you need to re-run
 ```
 
-Then use your favourite text editer to create a list of the paths to each of the following dependencies in the following tab-delimited format, calling it ```dependencies.txt```.
+While these R packages are installing, let's set up the shortcut to scp files to your local machine. On your local machine, edit your ~/.ssh/config file (if you don't have one, make one) to include the following:
+
+```
+Host <bugwas>
+    HostName <YOUR PUBLIC IP>
+    IdentityFile <YOUR .pem or ~/.ssh/id_rsa>
+    IdentitiesOnly yes
+    User ubuntu
+```    
+
+Then, back on the EC2 instance, use your favourite text editer to create a list of the paths to each of the following dependencies in the following tab-delimited format, calling it ```dependencies.txt```.
 
 name  path
-GEMMA  ~/soft/gemma
-blastn ~/soft/blastn
+GEMMA  ~/bugwas/gemma/gemma.0.93b
+blastn /usr/bin/blastn
 
 
 Files provided:
@@ -126,7 +139,15 @@ Rscript kmerAnnotation.R –chisq_results fus300.gwaskmer-out.chisqStat.txt –k
 
 Visualising significant kmers
 -------------------------
-The script we just ran generates p-values from the chi-square test for each kmer. It also generates a couple of plots – an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of –log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). YAY. 
+The script we just ran generates p-values from the chi-square test for each kmer. It also generates a couple of plots – an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. 
+
+Get them to your local machine with the following:
+
+```
+scp bugwas:/mnt/*.png
+```
+
+The empirical cumulative distribution function plots the p-values for each kmer, ordered by significance. The quantile-quantile plot compares the distribution of –log10 p-values for the kmers in our dataset to a theoretical distribution. Here we can see that we have more significant kmers than would be expected by chance (red line). YAY. 
 
 Correcting for population structure
 -------------------------
@@ -169,7 +190,13 @@ lin_loc(gen="~/data/fus300_bugwas_gemma_gen_format.txt",pheno="~/data/fus300_bug
 
 ```
 
-Let's look at some of the plots produced by _bugwas_. The key plot that we are going to look at today is `fus300_tree_branchescolouredbyPC.png`. This shows lineages that are associated with fusidic acid resistance. The lineages are defined by principal components (PCs) (for the maths behind this, please refer to McVean, 2009). Here we can see that PCs 1 and 6 split off groups of resistant and sensitive isolates.
+Let's look at some of the plots produced by _bugwas_ - get them on your local machine.
+
+```
+scp bugwas:/mnt/bugwas*.png
+```
+
+The key plot that we are going to look at today is `fus300_tree_branchescolouredbyPC.png`. This shows lineages that are associated with fusidic acid resistance. The lineages are defined by principal components (PCs) (for the maths behind this, please refer to McVean, 2009). Here we can see that PCs 1 and 6 split off groups of resistant and sensitive isolates.
 
 We can also look at which variants are associated with the phenotype. The plot `fus300_genVar1_ManhattanLMMPvalues.png` shows that we have lineage-specific variants strongly associated with fusidic acid resistance (in green) and variants that are associated with the phenotype (high -log10 p-value) but which are not significantly associated with any lineage (not shaded). You'll have to take my word for this, but when we looked mapped the kmers corresponding to the locus-specific effects up, they map to _fusA_, a gene known to be associated with fusidic acid resistance.
 
