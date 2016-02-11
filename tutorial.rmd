@@ -140,7 +140,7 @@ Visualising significant kmers
 -------------------------
 The script we just ran generates p-values from the chi-square test for each kmer. It also generates a couple of plots - an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. 
 
-Get them to your local machine with the following:
+Get them to your local machine with the following (run on your local computer):
 
 ```
 scp bugwas:~/*.png ./
