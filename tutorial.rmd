@@ -68,7 +68,7 @@ git clone https://github.com/xiangzhou/GEMMA.git
 
 And we need to download the R package _bugwas_:
 
-```git clone git@github.com:sgearle/bugwas.git```
+```git clone https://github.com/sgearle/bugwas.git```
 
 Finally, let's open R and install a couple of packages.
 ```
