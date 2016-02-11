@@ -38,7 +38,7 @@ Outline of workflow for bacterial GWAS
 3.	Annotate top kmers with BLAST.
 4.	Controlling for population structure with a linear mixed model (running Gemma).
 5.	Compare top kmers before and after controlling for population structure.
-6.  Use _bugwas_ R packaage to detect lineage and locus effects.
+6.  Use _bugwas_ R package to detect lineage and locus effects.
 
 Dependencies
 -------------------------
@@ -54,14 +54,15 @@ codename=$(lsb_release -c -s)
 echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" | sudo tee -a /etc/apt/sources.list > /dev/null
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo add-apt-repository ppa:marutter/rdev
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install r-base r-base-dev
+sudo apt-get update && sudo apt-get upgrade && \
+    sudo apt-get install -y r-base r-base-dev
 ```
 
-Then we'll download the scripts for our GWAS pipeline:
+Then we'll download the scripts for our GWAS pipeline. Install git,
 
-```sudo apt-get install git```
+```sudo apt-get install -y git```
+
+then clone the repository.
 
 ```git clone https://github.com/jessiewu/bacterialGWAS.git```
 
