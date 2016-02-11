@@ -44,12 +44,17 @@ Let's start with downloading and installing all of the software we need to run o
 
 Our pipeline is written in R and we are going to use R on the command line to run some of the scripts from the pipeline. 
 
-Let's start by installing R.
+Let's start by installing R. Unfortunately our code relies on a newer version of R than the one that comes with the basic install on the EC2 Ubuntu machines, but someone on the internet has gone through the pain of figuring this out, and I've shamelessly pinched it (link here if anyone cares: http://askubuntu.com/questions/614530/how-to-install-latest-version-of-r-on-ubuntu-12-04-lts).
 
-```mkdir \soft```
-
-```sudo apt-get install r-base-core```
-
+```
+codename=$(lsb_release -c -s)
+echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" | sudo tee -a /etc/apt/sources.list > /dev/null
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+sudo add-apt-repository ppa:marutter/rdev
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install r-base r-base-dev
+```
 
 Then we'll download the scripts for our GWAS pipeline:
 
@@ -74,14 +79,16 @@ Finally, let's open R and install a couple of packages.
 ```
 R
 install.packages("genoPlotR")
-install.packages("\soft/bugwas/bugwas_1.0.tar.gz", repos = NULL, type="source")
+install.packages("ape")
+install.packages("phangorn") #this takes forever on Ubuntu.
+install.packages("bugwas/build/bugwas_1.0.tar.gz", repos = NULL, type="source")
 ```
 
-Then use your favourite text editer to create a list of the paths to each of the following dependencies in the following tab-delimited format:
+Then use your favourite text editer to create a list of the paths to each of the following dependencies in the following tab-delimited format, calling it ```dependencies.txt```.
+
 name  path
 GEMMA  ~/soft/gemma
 blastn ~/soft/blastn
-
 
 
 Files provided:
@@ -97,7 +104,7 @@ Files provided:
 
 Run basic GWAS analysis:
 -------------------------
-Normally the input to our pipeline starts with raw reads in a bam or fasta file, but kmer-counting is time-consuming so we have generated kmer files for you. Each kmer file contains the reads from a single genome, split up into 31-nucleotide kmers. The files in the ```kmers``` directory contain the set of unique kmers in each genome. ```fus300.kmer.files.txt``` lists the path to the fasta file for each genome and the phenotype for fusidic acid resistance for each genome.For the phenotypes, 0 and 1 denote sensitivity or resistance to fusidic acid, respectively.
+Normally the input to our pipeline starts with raw reads in a bam or fasta file, but kmer-counting is time-consuming so we have generated kmer files for you. Each kmer file contains the reads from a single genome, split up into 31-nucleotide kmers. The files in the ```~/data/kmers``` directory contain the set of unique kmers in each genome. ```fus300.kmer.files.txt``` lists the path to the fasta file for each genome and the phenotype for fusidic acid resistance for each genome.For the phenotypes, 0 and 1 denote sensitivity or resistance to fusidic acid, respectively.
 
 Now we need to run a piece of c++ code that gets patterns of presence or absence of each kmer in each genome and tests each kmer for a significant association with the phenotype using a Chi-Square test. 
 
@@ -105,7 +112,7 @@ We run this using the following R script:
 
 ```
 #Bash Shell
-Rscript kmerAnalysis.R –dataFile fus300.kmerfiles.txt –prefix fus –removeKmerTxt FALSE –mincov 5 –externalSoftware dependencies.txt
+Rscript kmerAnalysis.R –dataFile ~/data/fus300.kmerfiles.txt –prefix fus –removeKmerTxt FALSE –mincov 5 –externalSoftware dependencies.txt
 ```
 
 Annotating significant kmers
