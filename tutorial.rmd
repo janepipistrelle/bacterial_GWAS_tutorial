@@ -104,6 +104,9 @@ cat > dependencies.txt <<EOF
 name	path
 GEMMA	~/bugwas/gemma/gemma.0.93b
 blastn	/usr/bin/blastn
+PrintOutTopXChiSq   bacterialGWAS/kmerGWAS/PrintOutTopXChiSq.class
+sortDsk bacterialGWAS/kmerGWAS/sort_dsk
+gwasKmerPattern bacterialGWAS/kmerGWAS/gwas_kmer_pattern
 EOF
 ```
 
