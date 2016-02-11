@@ -54,7 +54,7 @@ codename=$(lsb_release -c -s)
 echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" | sudo tee -a /etc/apt/sources.list > /dev/null
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo add-apt-repository ppa:marutter/rdev
-sudo apt-get update && sudo apt-get upgrade && \
+sudo apt-get update && sudo apt-get -y upgrade && \
     sudo apt-get install -y r-base r-base-dev
 ```
 
@@ -71,7 +71,7 @@ For this example we are only doing a kmer GWAS so the relevant scripts are all i
 We also need a few more external dependencies, which are `BLAST`, `_bugwas_` and```GEMMA``` (included in _bugwas_):
 
 ```
-sudo apt-get install ncbi-blast+
+sudo apt-get install -y ncbi-blast+
 git clone https://github.com/sgearle/bugwas.git
 ```
 
@@ -95,12 +95,15 @@ Host <bugwas>
     User ubuntu
 ```    
 
-Then, back on the EC2 instance, use your favourite text editer to create a list of the paths to each of the following dependencies in the following tab-delimited format, calling it ```dependencies.txt```.
+Then, back on the EC2 instance, create a list of the paths to each of the following dependencies in the following tab-delimited format, calling it ```dependencies.txt```.
 
-name  path
-GEMMA  ~/bugwas/gemma/gemma.0.93b
-blastn /usr/bin/blastn
-
+```
+cat > dependencies.txt <<EOF
+name	path
+GEMMA	~/bugwas/gemma/gemma.0.93b
+blastn	/bin/blastn
+EOF
+```
 
 Files provided:
 -------------------------
