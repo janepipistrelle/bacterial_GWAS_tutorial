@@ -67,16 +67,12 @@ Then we'll download the scripts for our GWAS pipeline:
 
 For this example we are only doing a kmer GWAS so the relevant scripts are all in the ```kmerGWAS``` directory.
 
-We also need a few more external dependencies, which are `BLAST` and ```GEMMA```:
+We also need a few more external dependencies, which are `BLAST`, `_bugwas_` and```GEMMA``` (included in _bugwas_):
 
 ```
 sudo apt-get install ncbi-blast+
-git clone https://github.com/xiangzhou/GEMMA.git
+git clone https://github.com/sgearle/bugwas.git
 ```
-
-And we need to download the R package _bugwas_:
-
-```git clone https://github.com/sgearle/bugwas.git```
 
 Finally, let's open R and install a couple of packages (select 25 for mirror when prompted and answer yes when it asks if you want to install into a local library directory).
 ```
