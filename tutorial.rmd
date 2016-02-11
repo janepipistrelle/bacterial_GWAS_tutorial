@@ -63,7 +63,7 @@ We also need a few more external dependencies, which are `BLAST` and ```GEMMA```
 
 ```
 sudo apt-get install ncbi-blast+
-git clone git@github.com:xiangzhou/GEMMA.git
+git clone https://github.com/xiangzhou/GEMMA.git
 ```
 
 And we need to download the R package _bugwas_:
