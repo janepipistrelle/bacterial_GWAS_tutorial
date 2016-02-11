@@ -116,6 +116,10 @@ Run basic GWAS analysis:
 -------------------------
 Normally the input to our pipeline starts with raw reads in a bam or fasta file, but kmer-counting is time-consuming so we have generated kmer files for you. Each kmer file contains the reads from a single genome, split up into 31-nucleotide kmers. The files in the ```~/data/kmers``` directory contain the set of unique kmers in each genome. ```fus300.kmer.files.txt``` lists the path to the fasta file for each genome and the phenotype for fusidic acid resistance for each genome.For the phenotypes, 0 and 1 denote sensitivity or resistance to fusidic acid, respectively.
 
+I put the wrong file into the data bundle so we need to fix the filepaths before this will run. Please run the following Perl one-liner to correct this:
+
+```perl -pi -e 's/\/dipro\/mmm\/gorm\/v3\/ana\/Saur\/AbxGWAS\/dsk\//~\/data\/kmers\//g' ~/data/fus300.kmerfiles.txt``
+
 Now we need to run a piece of c++ code that gets patterns of presence or absence of each kmer in each genome and tests each kmer for a significant association with the phenotype using a Chi-Square test. 
 
 We run this using the following R script:
