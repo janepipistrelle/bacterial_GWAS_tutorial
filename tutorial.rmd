@@ -38,7 +38,7 @@ Outline of workflow for bacterial GWAS
 3.	Annotate top kmers with BLAST.
 4.	Controlling for population structure with a linear mixed model (running Gemma).
 5.	Compare top kmers before and after controlling for population structure.
-6.  Use _bugwas_ R packaage to detect lineage and locus effects.
+6.  Use _bugwas_ R package to detect lineage and locus effects.
 
 Dependencies
 -------------------------
@@ -54,14 +54,15 @@ codename=$(lsb_release -c -s)
 echo "deb http://cran.fhcrc.org/bin/linux/ubuntu $codename/" | sudo tee -a /etc/apt/sources.list > /dev/null
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo add-apt-repository ppa:marutter/rdev
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install r-base r-base-dev
+sudo apt-get update && sudo apt-get -y upgrade && \
+    sudo apt-get install -y r-base r-base-dev
 ```
 
-Then we'll download the scripts for our GWAS pipeline:
+Then we'll download the scripts for our GWAS pipeline. Install git,
 
-```sudo apt-get install git```
+```sudo apt-get install -y git```
+
+then clone the repository.
 
 ```git clone https://github.com/jessiewu/bacterialGWAS.git```
 
@@ -70,11 +71,13 @@ For this example we are only doing a kmer GWAS so the relevant scripts are all i
 We also need a few more external dependencies, which are `BLAST`, `_bugwas_` and```GEMMA``` (included in _bugwas_):
 
 ```
-sudo apt-get install ncbi-blast+
 git clone https://github.com/sgearle/bugwas.git
+sudo apt-get install -y ncbi-blast+
 ```
 
 Finally, let's open R and install a couple of packages (select 25 for mirror when prompted and answer yes when it asks if you want to install into a local library directory).
+
+Run the following commands one line at a time:
 ```
 R
 install.packages("genoPlotR")
@@ -94,12 +97,15 @@ Host <bugwas>
     User ubuntu
 ```    
 
-Then, back on the EC2 instance, use your favourite text editer to create a list of the paths to each of the following dependencies in the following tab-delimited format, calling it ```dependencies.txt```.
+Then, back on the EC2 instance, create a list of the paths to each of the following dependencies in the following tab-delimited format, calling it ```dependencies.txt```.
 
-name  path
-GEMMA  ~/bugwas/gemma/gemma.0.93b
-blastn /usr/bin/blastn
-
+```
+cat > dependencies.txt <<EOF
+name	path
+GEMMA	~/bugwas/gemma/gemma.0.93b
+blastn	/usr/bin/blastn
+EOF
+```
 
 Files provided:
 -------------------------
@@ -118,7 +124,7 @@ Normally the input to our pipeline starts with raw reads in a bam or fasta file,
 
 I put the wrong file into the data bundle so we need to fix the filepaths before this will run. Please run the following Perl one-liner to correct this:
 
-```perl -pi -e 's/\/dipro\/mmm\/gorm\/v3\/ana\/Saur\/AbxGWAS\/dsk\//data\/kmers\//g' ~/data/fus300.kmerfiles.txt``
+```perl -pi -e 's/\/dipro\/mmm\/gorm\/v3\/ana\/Saur\/AbxGWAS\/dsk\//data\/kmers\//g' ~/data/fus300.kmerfiles.txt```
 
 Now we need to run a piece of c++ code that gets patterns of presence or absence of each kmer in each genome and tests each kmer for a significant association with the phenotype using a Chi-Square test. 
 
@@ -126,7 +132,9 @@ We run this using the following R script:
 
 ```
 #Bash Shell
-Rscript bacterialGWAS/kmerGWAS/kmerAnalysis.R -dataFile ~/data/fus300.kmerfiles.txt -prefix fus300 -removeKmerTxt FALSE -minCov 5 -externalSoftware dependencies.txt
+Rscript bacterialGWAS/kmerGWAS/kmerAnalysis.R -dataFile \
+            ~/data/fus300.kmerfiles.txt -prefix fus300 \
+            -removeKmerTxt FALSE -minCov 5 -externalSoftware dependencies.txt
 ```
 
 
@@ -134,7 +142,7 @@ Visualising significant kmers
 -------------------------
 The script we just ran generates p-values from the chi-square test for each kmer. It also generates a couple of plots - an empirical cumulative distribution function (ECDF) plot and a quantile-quantile (QQ) plot. While we're annotating the kmers, let's take a moment to look at these. 
 
-Get them to your local machine with the following:
+Get them to your local machine with the following (run on your local computer):
 
 ```
 scp bugwas:~/*.png ./
