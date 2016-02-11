@@ -77,6 +77,12 @@ install.packages("genoPlotR")
 install.packages("\soft/bugwas/bugwas_1.0.tar.gz", repos = NULL, type="source")
 ```
 
+Then use your favourite text editer to create a list of the paths to each of the following dependencies in the following tab-delimited format:
+name  path
+GEMMA  ~/soft/gemma
+blastn ~/soft/blastn
+
+
 
 Files provided:
 -------------------------
@@ -87,7 +93,7 @@ Files provided:
 *	BLAST databases and gene look-up table for annotation
 *	R scripts: kmerAnalysis.R, kmerAnnotation.R, kmerLMM.R, LMM_kmerAnnotation.R
 * _bugwas_ library in R.
-* List of paths to software dependencies.
+
 
 Run basic GWAS analysis:
 -------------------------
