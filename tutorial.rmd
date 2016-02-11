@@ -71,11 +71,13 @@ For this example we are only doing a kmer GWAS so the relevant scripts are all i
 We also need a few more external dependencies, which are `BLAST`, `_bugwas_` and```GEMMA``` (included in _bugwas_):
 
 ```
-sudo apt-get install -y ncbi-blast+
 git clone https://github.com/sgearle/bugwas.git
+sudo apt-get install -y ncbi-blast+
 ```
 
 Finally, let's open R and install a couple of packages (select 25 for mirror when prompted and answer yes when it asks if you want to install into a local library directory).
+
+Run the following commands one line at a time:
 ```
 R
 install.packages("genoPlotR")
