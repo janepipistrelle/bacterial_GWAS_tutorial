@@ -122,7 +122,7 @@ Normally the input to our pipeline starts with raw reads in a bam or fasta file,
 
 I put the wrong file into the data bundle so we need to fix the filepaths before this will run. Please run the following Perl one-liner to correct this:
 
-```perl -pi -e 's/\/dipro\/mmm\/gorm\/v3\/ana\/Saur\/AbxGWAS\/dsk\//data\/kmers\//g' ~/data/fus300.kmerfiles.txt``
+```perl -pi -e 's/\/dipro\/mmm\/gorm\/v3\/ana\/Saur\/AbxGWAS\/dsk\//data\/kmers\//g' ~/data/fus300.kmerfiles.txt```
 
 Now we need to run a piece of c++ code that gets patterns of presence or absence of each kmer in each genome and tests each kmer for a significant association with the phenotype using a Chi-Square test. 
 
@@ -130,7 +130,9 @@ We run this using the following R script:
 
 ```
 #Bash Shell
-Rscript bacterialGWAS/kmerGWAS/kmerAnalysis.R -dataFile ~/data/fus300.kmerfiles.txt -prefix fus300 -removeKmerTxt FALSE -minCov 5 -externalSoftware dependencies.txt
+Rscript bacterialGWAS/kmerGWAS/kmerAnalysis.R -dataFile \
+            ~/data/fus300.kmerfiles.txt -prefix fus300 \
+            -removeKmerTxt FALSE -minCov 5 -externalSoftware dependencies.txt
 ```
 
 
