@@ -180,9 +180,9 @@ library(bugwas)
 
 #First we need to define a few variables..
 
-gem.path="bugwas-master/gemma/gemma.0.93b"
+gem.path="bugwas/gemma/gemma.0.93b"
 
-output.dir="./bugwas_out"
+output.dir="./"
 
 #Then we call the function “lin_loc” which tests for both lineage and locus effects and generates a bunch of plots. This function needs the genotypes, phenotype, the relatedness matrix we used earlier and the path to the GEMMA software.
 lin_loc(gen="data/fus300_bugwas_gemma_gen_format.txt",pheno="data/fus300_bugwas.pheno.txt",phylo="data/RAxML_bestTree.fus300",prefix="fus300",gem.path=gem.path,var.matrix="data/fus300_bugwas.var.matrix.txt",relmatrix="data/fus300_gemma_relmatrixout.cXX.txt", output.dir=output.dir)
